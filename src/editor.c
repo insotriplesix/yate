@@ -1,6 +1,6 @@
 #include "editor.h"
 
-char filename[NAME_MAX];
+char filename[FILENAME_MAX];
 
 int
 change_theme(WINDOW **win, int height, int width)
@@ -79,8 +79,11 @@ change_theme_popup(int height, int width)
 	wmove(win, line++, 1);
 	waddstr(win, " [3] hell ");
 
-	prefresh(win, 0, 0, height / 2 - win_height / 2, width / 2 - win_width / 2,
-		height / 2 + win_height / 2, width / 2 + win_width / 2);
+	prefresh(win, 0, 0,
+		height / 2 - win_height / 2,
+		width / 2 - win_width / 2,
+		height / 2 + win_height / 2,
+		width / 2 + win_width / 2);
 
 	int choice = wgetch(win);
 
@@ -147,8 +150,11 @@ help_popup(int height, int width)
 	wmove(win, line++, 1);
 	waddstr(win, " ^Y - live encryption");
 
-	prefresh(win, 0, 0, height / 2 - win_height / 2, width / 2 - win_width / 2,
-		height / 2 + win_height / 2, width / 2 + win_width / 2);
+	prefresh(win, 0, 0,
+		height / 2 - win_height / 2,
+		width / 2 - win_width / 2,
+		height / 2 + win_height / 2,
+		width / 2 + win_width / 2);
 
 	wgetch(win);
 
@@ -161,45 +167,83 @@ help_popup(int height, int width)
 	return OK;
 }
 
-void
-open_file(char *buf, int *size, int height, int width)
+int
+open_file(char *buf, int *size, int height, int width, bool from_arg)
 {
-	open_file_popup(height, width);
+	if (!from_arg && open_file_popup(height, width) == ERR) {
+		perror("open_file_popup");
+		return ERR;
+	}
 
-	FILE *fp;
-	char ch;
+	FILE *fp = fopen(filename, "r");
 
-	if ((fp = fopen(filename, "r"))) {
-		while ((ch = fgetc(fp)) != EOF) {
-			buf[(*size)++] = ch;
+	if (fp == NULL) {	// MOVE2 INFO BAR
+		fprintf(stderr, "Error opening file '%s', skipped.", filename);
+		return OK;
+	}
+
+	// Get the file length
+	fseek(fp, 0L, SEEK_END);
+	long len = ftell(fp);
+	rewind(fp);
+
+	if (len > BUFSIZ && len > (long)size) {
+		// Allocate more space for the buffer
+		char *tmp = realloc(buf, sizeof(char) * len);
+
+		if (tmp == NULL) {
+			perror("realloc");
+			fclose(fp);
+			return ERR;
 		}
 
-		fclose(fp);
+		buf = tmp;
+		tmp = NULL;
+
+		memset(buf, 0, sizeof(char) * len);
 	}
+
+	char ch;
+	*size = 0;
+
+	while ((ch = fgetc(fp)) != EOF)
+		buf[(*size)++] = ch;	// err here?
+
+	fclose(fp);
+
+	return OK;
 }
 
-char*
+int
 open_file_popup(int height, int width)
 {
 	WINDOW *win;
 
-	char *fname = malloc(sizeof(char) * NAME_MAX);
-
 	int win_height = 3;
 	int win_width = 42;
 
-	echo();
-
-	win = newwin(win_height, win_width, height / 2 - win_height / 2,
+	win = newwin(win_height, win_width,
+		height / 2 - win_height / 2,
 		width / 2 - win_width / 2);
+
+	if (win == NULL) {
+		perror("newwin");
+		return ERR;
+	}
 
 	wattron(win, COLOR_PAIR(4));
 	box(win, ACS_VLINE, ACS_HLINE);
 	wattroff(win, COLOR_PAIR(4));
 	wbkgd(win, COLOR_PAIR(3));
 
+	echo();
+
 	mvwaddstr(win, 1, 1, " Enter file name: ");
 	wrefresh(win);
+	memset(filename, '\0', FILENAME_MAX);
+	scrollok(win, TRUE);
+	idlok(win, TRUE);
+	nonl();
 	mvwgetstr(win, 1, 19, filename);
 
 	noecho();
@@ -208,48 +252,59 @@ open_file_popup(int height, int width)
 	wrefresh(win);
 	delwin(win);
 
-	return fname;
+	return OK;
 }
 
-void
+int
 save_file(char *buf, int size, int height, int width)
 {
-	save_file_popup(height, width);
-
-	FILE *fp;
-	int i;
-
-	if ((fp = fopen(filename, "w"))) {
-		for (i = 0; i < size; ++i) {
-			fputc(buf[i], fp);
-		}
-
-		fclose(fp);
+	if (save_file_popup(height, width) == ERR) {
+		perror("save_file_popup");
+		return ERR;
 	}
+
+	FILE *fp = fopen(filename, "w");
+
+	if (fp == NULL) {	// MV2INFOBAR
+		fprintf(stderr, "Error opening file '%s', skipped.", filename);
+		return OK;
+	}
+
+	for (int i = 0; i < size; ++i)
+		fputc(buf[i], fp);
+
+	fclose(fp);
+
+	return OK;
 }
 
-char*
+int
 save_file_popup(int height, int width)
 {
 	WINDOW *win;
 
-	char *fname = malloc(sizeof(char) * NAME_MAX);
-
 	int win_height = 3;
 	int win_width = 42;
 
-	echo();
-
-	win = newwin(win_height, win_width, height / 2 - win_height / 2,
+	win = newwin(win_height, win_width,
+		height / 2 - win_height / 2,
 		width / 2 - win_width / 2);
+
+	if (win == NULL) {
+		perror("newwin");
+		return ERR;
+	}
 
 	wattron(win, COLOR_PAIR(4));
 	box(win, ACS_VLINE, ACS_HLINE);
 	wattroff(win, COLOR_PAIR(4));
 	wbkgd(win, COLOR_PAIR(3));
 
+	echo();
+
 	mvwaddstr(win, 1, 1, " Enter file name: ");
 	wrefresh(win);
+	memset(filename, '\0', FILENAME_MAX);
 	mvwgetstr(win, 1, 19, filename);
 
 	noecho();
@@ -258,5 +313,5 @@ save_file_popup(int height, int width)
 	wrefresh(win);
 	delwin(win);
 
-	return fname;
+	return OK;
 }

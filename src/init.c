@@ -1,6 +1,6 @@
 #include "init.h"
 
-char filename[NAME_MAX];
+char filename[FILENAME_MAX];
 
 /* Init ncurses library */
 int
@@ -107,10 +107,11 @@ init_windows(WINDOW **win, int height, int width)
 
 	wrefresh(win[2]);
 
-	// Enable func keys, arrows etc.
+	// Enable scrolling, func keys, arrows etc.
 	keypad(win[1], TRUE);
 	wmove(win[1], 1, 1);
-
+	scrollok(win[1], TRUE);
+	idlok(win[1], TRUE);
 	wrefresh(win[1]);
 
 	return OK;

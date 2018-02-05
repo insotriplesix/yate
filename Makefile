@@ -9,12 +9,10 @@ SRCDIR := src
 SOURCES := $(wildcard $(SRCDIR)/*.c)
 INCLUDES := -I $(INCDIR)
 
-all: $(EXEC)
+all: clean $(EXEC)
 
 $(EXEC):
 	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) $(LDLIBS) -o $(EXEC)
-
-.PHONY: clean
 
 clean:
 	rm -f $(EXEC)

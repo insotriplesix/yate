@@ -23,7 +23,7 @@
 #define CTRL_X 24
 #define CTRL_Y 25
 
-extern char filename[NAME_MAX];
+extern char filename[FILENAME_MAX];
 
 int change_theme(WINDOW **win, int height, int width);
 int change_theme_popup(int height, int width);
@@ -31,10 +31,10 @@ int change_theme_popup(int height, int width);
 int get_help(int height, int width);
 int help_popup(int height, int width);
 
-void open_file(char *buf, int *size, int height, int width);
-char *open_file_popup(int height, int width);
+int open_file(char *buf, int *size, int height, int width, bool from_arg);
+int open_file_popup(int height, int width);
 
-void save_file(char *buf, int size, int height, int width);
-char *save_file_popup(int height, int width);
+int save_file(char *buf, int size, int height, int width);
+int save_file_popup(int height, int width);
 
 #endif
