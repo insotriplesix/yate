@@ -10,6 +10,7 @@
 // TODO 4: fix buf realloc
 // TODO 5: info bar
 // TODO 6: valgrind memcheck
+//
 
 int
 main(int argc, char *argv[])
