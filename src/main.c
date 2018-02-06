@@ -5,12 +5,10 @@
 //char filename[FILENAME_MAX];
 
 // TODO 1: fix scrolling
-// TODO 2: extra window
-// TODO 3: hexeditor
-// TODO 4: fix buf realloc
-// TODO 5: info bar
-// TODO 6: valgrind memcheck
-//
+// TODO 2: hexeditor
+// TODO 3: fix buf realloc
+// TODO 4: info bar
+// TODO 5: valgrind memcheck
 
 int
 main(int argc, char *argv[])
@@ -21,7 +19,7 @@ main(int argc, char *argv[])
 
 	WINDOW *win[NWINDOWS];
 
-	int ch, i, width, height, rc;
+	int ch, i, width, height, rc = OK;
 
 	if (init_ncurses() == ERR || init_colors() == ERR) {
 		fprintf(stderr, "Cannot initialize ncurses library.\n");
@@ -51,7 +49,10 @@ main(int argc, char *argv[])
 
 		if (rc == ERR) {
 			fprintf(stderr, "Error in open_file() func.\n");
-			is_exit = TRUE;
+			free(filebuf);
+			endwin();
+			return rc;
+//			is_exit = TRUE;
 		}
 
 		// Repaint window to clear previous stuff
@@ -133,8 +134,8 @@ main(int argc, char *argv[])
 
 				break;
 			// Open file
-			case CTRL_O:
 			case KEY_F(4):
+			case CTRL_O:
 				rc = open_file(filebuf, &filebuf_size, height, width, FALSE);
 
 				if (rc == ERR) {
@@ -166,8 +167,8 @@ main(int argc, char *argv[])
 				}
 				break;
 			// Save to file
-			case CTRL_K:
 			case KEY_F(5):
+			case CTRL_K:
 				rc = save_file(filebuf, filebuf_size, height, width);
 
 				if (rc == ERR) {
@@ -175,28 +176,19 @@ main(int argc, char *argv[])
 					is_exit = TRUE;
 				}
 				break;
-			// Hex editor
-			case CTRL_E:			// TODO: IMPLEMENT & MOVE TO EXTRAS
-//				if (hex_editor() == ERR) {
-//					fprintf(stderr, "Error in hex_editor.\n");
-//					is_exit = TRUE;
-//				}
-				break;
+			// Extra
 			case KEY_F(6):
-			case CTRL_G:			// TODO: MOVE TO EXTRAS
-				rc = change_theme(win, height, width);
+			case CTRL_E:
+				rc = get_extra(height, width);
 
 				if (rc == ERR) {
-					fprintf(stderr, "Error in change_theme() func.\n");
+					fprintf(stderr, "Error in get_extra() func.\n");
 					is_exit = TRUE;
 				}
 				break;
-			case CTRL_Y:			// TODO: MOVE TO EXTRAS
-				encryption ^= TRUE;
-				break;
 			// Help
-			case CTRL_F:
 			case KEY_F(7):
+			case CTRL_F:
 				rc = get_help(height, width);
 
 				if (rc == ERR) {
@@ -205,16 +197,38 @@ main(int argc, char *argv[])
 				}
 				break;
 			// Exit
-			case CTRL_X:
 			case KEY_F(8):
+			case CTRL_X:
 				is_exit = TRUE;
 				break;
+/*			case CTRL_W:
+				rc = hex_editor(win, height, width);
+
+				if (rc == ERR) {
+					fprintf(stderr, "Error in hex_editor() func.\n");
+					is_exit = TRUE;
+				}
+				break;
+*/			// Change theme
+			case CTRL_G:
+				rc = change_theme(win, height, width);
+
+				if (rc == ERR) {
+					fprintf(stderr, "Error in change_theme() func.\n");
+					is_exit = TRUE;
+				}
+				break;
+			// Enable live encryption
+			case CTRL_Y:
+				encryption ^= TRUE;
+				break;
+			// Print character
 			default:
 				if (iscntrl(ch))
 					break;
 
 				if (encryption == TRUE)
-					ch ^= 42;
+					ch ^= 1;
 
 				filebuf_pos = curpos_y * width + curpos_x;
 				if (filebuf_size < BUFSIZ || filebuf_pos < filebuf_size)
@@ -231,18 +245,24 @@ main(int argc, char *argv[])
 				}
 		}
 
+		// Update options bar
+		touchwin(win[0]);
+		wrefresh(win[0]);
+
 		// Update info bar
 		mvwprintw(win[2], 0, width / 2 - 6, " %3d : %3d ", curpos_y, curpos_x);
+		touchwin(win[2]);
 		wrefresh(win[2]);
 
 		// Update text field
 		wmove(win[1], curpos_y, curpos_x);
 		touchwin(win[1]);
 		wrefresh(win[1]);
+
 	} while (!is_exit);
 
 	free(filebuf);
 	endwin();
 
-	return 0;
+	return rc;
 }

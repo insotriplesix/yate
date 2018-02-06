@@ -28,6 +28,9 @@ extern char filename[FILENAME_MAX];
 int change_theme(WINDOW **win, int height, int width);
 int change_theme_popup(int height, int width);
 
+int get_extra(int height, int width);
+int extra_popup(int height, int width);
+
 int get_help(int height, int width);
 int help_popup(int height, int width);
 

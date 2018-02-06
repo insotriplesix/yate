@@ -97,6 +97,68 @@ change_theme_popup(int height, int width)
 }
 
 int
+get_extra(int height, int width)
+{
+	return extra_popup(height, width);
+}
+
+int
+extra_popup(int height, int width)
+{
+	WINDOW *win;
+
+	int win_height = 4;
+	int win_width = 14;
+	int line = 0;
+
+	// Offset to extra opt
+	int offset_y = 2;
+	int offset_x = 32;
+
+	win = newpad(win_height, win_width);
+
+	if (win == NULL) {
+		perror("newpad");
+		return ERR;
+	}
+
+//	wattron(win, COLOR_PAIR(4));
+//	box(win, ACS_VLINE, ACS_HLINE);
+//	wattroff(win, COLOR_PAIR(4));
+	wbkgd(win, COLOR_PAIR(1));
+
+	curs_set(0);
+
+	wmove(win, line++, 1);
+	waddstr(win, "------------");
+	wmove(win, line++, 1);
+	waddstr(win, "^W - hexedit");
+	wmove(win, line++, 1);
+	waddstr(win, "^Y - livexor");
+	wmove(win, line++, 1);
+	waddstr(win, "^G - themez");
+//58
+	prefresh(win, 0, 0,
+		offset_y, offset_x,
+		offset_y + win_height,
+		offset_x + win_width);
+//		height / 2 - win_height / 2,
+//		width / 2 - win_width / 2,
+//		height / 2 + win_height / 2,
+//		width / 2 + win_width / 2);
+
+	wgetch(win);
+
+	wclear(win);
+	wrefresh(win);
+	delwin(win);
+
+	curs_set(1);
+
+	return OK;
+}
+
+int
 get_help(int height, int width)
 {
 	return help_popup(height, width);
