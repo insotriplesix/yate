@@ -29,90 +29,87 @@ init_colors()
 
 /* Init default windows */
 int
-init_windows(WINDOW **win, int height, int width)
+init_windows()
 {
-	// 0 -> Menu bar
-	win[0] = newwin(3, width, 0, 0);
+	win[MENU_W] = newwin(3, COLS, 0, 0);
 
-	if (win[0] == NULL) {
+	if (win[MENU_W] == NULL) {
 		perror("newwin");
 		return ERR;
 	}
 
-	wattron(win[0], COLOR_PAIR(4));
-	box(win[0], ACS_VLINE, ACS_HLINE);
-	wattroff(win[0], COLOR_PAIR(4));
-	wbkgd(win[0], COLOR_PAIR(4));
+	wattron(win[MENU_W], COLOR_PAIR(4));
+	box(win[MENU_W], ACS_VLINE, ACS_HLINE);
+	wattroff(win[MENU_W], COLOR_PAIR(4));
+	wbkgd(win[MENU_W], COLOR_PAIR(4));
 
 	int offset = 2;
 
-	wattron(win[0], COLOR_PAIR(1));
-	mvwprintw(win[0], 1, offset, "  F4 - Open  ");
+	wattron(win[MENU_W], COLOR_PAIR(1));
+	mvwprintw(win[MENU_W], 1, offset, "  F4 - Open  ");
 	offset += 15;
-	mvwprintw(win[0], 1, offset, "  F5 - Save  ");
+	mvwprintw(win[MENU_W], 1, offset, "  F5 - Save  ");
 	offset += 15;
-	mvwprintw(win[0], 1, offset, "  F6 - Extra  ");
+	mvwprintw(win[MENU_W], 1, offset, "  F6 - Extra  ");
 	offset += 16;
-	mvwprintw(win[0], 1, offset, "  F7 - Help  ");
+	mvwprintw(win[MENU_W], 1, offset, "  F7 - Help  ");
 	offset += 15;
-	mvwprintw(win[0], 1, offset, "  F8 - Exit  ");
-	mvwprintw(win[0], 1, width - 20, " made by 5aboteur ");
-	wattroff(win[0], COLOR_PAIR(1));
+	mvwprintw(win[MENU_W], 1, offset, "  F8 - Exit  ");
+	mvwprintw(win[MENU_W], 1, COLS - 20, " made by 5aboteur ");
+	wattroff(win[MENU_W], COLOR_PAIR(1));
 
-	wrefresh(win[0]);
+	wrefresh(win[MENU_W]);
 
-	// 1 -> Text field
-	win[1] = newwin(height - 8, width, 3, 0);
+	win[EDIT_W] = newwin(LINES - 8, COLS, 3, 0);
 
-	if (win[1] == NULL) {
+	if (win[EDIT_W] == NULL) {
 		perror("newwin");
 		return ERR;
 	}
 
-	wattron(win[1], COLOR_PAIR(4));
-	box(win[1], ACS_VLINE, ACS_HLINE);
-	wattroff(win[1], COLOR_PAIR(4));
-	wbkgd(win[1], COLOR_PAIR(2));
+	wattron(win[EDIT_W], COLOR_PAIR(4));
+	box(win[EDIT_W], ACS_VLINE, ACS_HLINE);
+	wattroff(win[EDIT_W], COLOR_PAIR(4));
+	wbkgd(win[EDIT_W], COLOR_PAIR(2));
 
-	wrefresh(win[1]);
+	wrefresh(win[EDIT_W]);
 
-	// 2 -- Info panel
-	win[2] = newwin(5, width, height - 5, 0);
+	win[INFO_W] = newwin(5, COLS, LINES - 5, 0);
 
-	if (win[2] == NULL) {
+	if (win[INFO_W] == NULL) {
 		perror("newwin");
 		return ERR;
 	}
 
-	wattron(win[2], COLOR_PAIR(4));
-	box(win[2], ACS_VLINE, ACS_HLINE);
-	wattroff(win[2], COLOR_PAIR(4));
-	wbkgd(win[2], COLOR_PAIR(1));
+	wattron(win[INFO_W], COLOR_PAIR(4));
+	box(win[INFO_W], ACS_VLINE, ACS_HLINE);
+	wattroff(win[INFO_W], COLOR_PAIR(4));
+	wbkgd(win[INFO_W], COLOR_PAIR(1));
 
 	offset = 4;
 
-	mvwprintw(win[2], 2, offset, "FILE: %s", filename);
+	mvwprintw(win[INFO_W], 2, offset, "FILE: %s", filename);
 	offset += 10 + strlen(filename);
-	mvwprintw(win[2], 2, offset, "SIZE: %3d b", 0);
+	mvwprintw(win[INFO_W], 2, offset, "SIZE: %3d b", 0);
 	offset += 15;
-	mvwprintw(win[2], 2, offset, "TYPE: %c", 'r');
+	mvwprintw(win[INFO_W], 2, offset, "TYPE: %c", 'r');
 	offset += 11;
-	mvwprintw(win[2], 2, offset, "ENCRYPT: %c", 'n');
+	mvwprintw(win[INFO_W], 2, offset, "ENCRYPT: %c", 'n');
 	offset += 14;
-	mvwprintw(win[2], 2, offset, "STATUS: %c", 'n');
-	mvwprintw(win[2], 2, width - 10, "v1.0");
+	mvwprintw(win[INFO_W], 2, offset, "STATUS: %c", 'n');
+	mvwprintw(win[INFO_W], 2, COLS - 10, "v1.0");
 
-	wattron(win[2], COLOR_PAIR(4));
-	mvwprintw(win[2], 0, width / 2 - 6, " %3d : %3d ", 1, 1);
+	wattron(win[INFO_W], COLOR_PAIR(4));
+	mvwprintw(win[INFO_W], 0, COLS / 2 - 6, " %3d : %3d ", 1, 1);
 
-	wrefresh(win[2]);
+	wrefresh(win[INFO_W]);
 
 	// Enable scrolling, func keys, arrows etc.
-	keypad(win[1], TRUE);
-	wmove(win[1], 1, 1);
-	scrollok(win[1], TRUE);
-	idlok(win[1], TRUE);
-	wrefresh(win[1]);
+	keypad(win[EDIT_W], TRUE);
+	wmove(win[EDIT_W], 1, 1);
+	scrollok(win[EDIT_W], TRUE);
+	idlok(win[EDIT_W], TRUE);
+	wrefresh(win[EDIT_W]);
 
 	return OK;
 }

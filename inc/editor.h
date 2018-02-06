@@ -8,8 +8,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define NWINDOWS 3
-
 #define KEY_BS '\b'
 #define KEY_CR '\r'
 #define KEY_HT '\t'
@@ -23,21 +21,24 @@
 #define CTRL_X 24
 #define CTRL_Y 25
 
+#define NWINDOWS 3
+
+enum win_t { MENU_W, EDIT_W, INFO_W };
+
+WINDOW *win[NWINDOWS];
+
 extern char filename[FILENAME_MAX];
 
-int change_theme(WINDOW **win, int height, int width);
-int change_theme_popup(int height, int width);
+int change_theme();
+int change_theme_popup();
 
-int get_extra(int height, int width);
-int extra_popup(int height, int width);
+int get_extra();
+int get_help();
 
-int get_help(int height, int width);
-int help_popup(int height, int width);
+int open_file(char **buf, int *size, bool from_arg);
+int open_file_popup();
 
-int open_file(char *buf, int *size, int height, int width, bool from_arg);
-int open_file_popup(int height, int width);
-
-int save_file(char *buf, int size, int height, int width);
-int save_file_popup(int height, int width);
+int save_file(char *buf, int size);
+int save_file_popup();
 
 #endif

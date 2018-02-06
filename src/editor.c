@@ -3,11 +3,13 @@
 char filename[FILENAME_MAX];
 
 int
-change_theme(WINDOW **win, int height, int width)
+change_theme()
 {
-	int fg_field, bg_field, fg_menu, bg_menu, fg_popup, bg_popup;
-	int choice = change_theme_popup(height, width);
+	int fg_field, bg_field,
+		fg_menu, bg_menu,
+		fg_popup, bg_popup;
 
+	int choice = change_theme_popup();
 	if (choice == ERR) return ERR;
 
 	switch ((char)choice) {
@@ -36,25 +38,28 @@ change_theme(WINDOW **win, int height, int width)
 	}
 
 	init_pair(1, fg_menu, bg_menu);
-	wattrset(win[0], COLOR_PAIR(1));
+	wattrset(win[MENU_W], COLOR_PAIR(1));
 
 	init_pair(2, fg_field, bg_field);
-	wattrset(win[1], COLOR_PAIR(2));
+	wattrset(win[EDIT_W], COLOR_PAIR(2));
 
 	init_pair(3, fg_popup, bg_popup);
-	wattrset(win[2], COLOR_PAIR(3));
+	wattrset(win[INFO_W], COLOR_PAIR(3));
 
 	return OK;
 }
 
 int
-change_theme_popup(int height, int width)
+change_theme_popup()
 {
 	WINDOW *win;
 
 	int win_height = 6;
 	int win_width = 13;
 	int line = 1;
+
+	int offset_y = LINES / 2;
+	int offset_x = COLS / 2;
 
 	win = newpad(win_height, win_width);
 
@@ -80,10 +85,10 @@ change_theme_popup(int height, int width)
 	waddstr(win, " [3] hell ");
 
 	prefresh(win, 0, 0,
-		height / 2 - win_height / 2,
-		width / 2 - win_width / 2,
-		height / 2 + win_height / 2,
-		width / 2 + win_width / 2);
+		offset_y - win_height / 2,
+		offset_x - win_width / 2,
+		offset_y + win_height / 2,
+		offset_x + win_width / 2);
 
 	int choice = wgetch(win);
 
@@ -97,13 +102,7 @@ change_theme_popup(int height, int width)
 }
 
 int
-get_extra(int height, int width)
-{
-	return extra_popup(height, width);
-}
-
-int
-extra_popup(int height, int width)
+get_extra()
 {
 	WINDOW *win;
 
@@ -111,7 +110,6 @@ extra_popup(int height, int width)
 	int win_width = 14;
 	int line = 0;
 
-	// Offset to extra opt
 	int offset_y = 2;
 	int offset_x = 32;
 
@@ -122,9 +120,6 @@ extra_popup(int height, int width)
 		return ERR;
 	}
 
-//	wattron(win, COLOR_PAIR(4));
-//	box(win, ACS_VLINE, ACS_HLINE);
-//	wattroff(win, COLOR_PAIR(4));
 	wbkgd(win, COLOR_PAIR(1));
 
 	curs_set(0);
@@ -137,15 +132,11 @@ extra_popup(int height, int width)
 	waddstr(win, "^Y - livexor");
 	wmove(win, line++, 1);
 	waddstr(win, "^G - themez");
-//58
+
 	prefresh(win, 0, 0,
 		offset_y, offset_x,
 		offset_y + win_height,
 		offset_x + win_width);
-//		height / 2 - win_height / 2,
-//		width / 2 - win_width / 2,
-//		height / 2 + win_height / 2,
-//		width / 2 + win_width / 2);
 
 	wgetch(win);
 
@@ -159,19 +150,16 @@ extra_popup(int height, int width)
 }
 
 int
-get_help(int height, int width)
-{
-	return help_popup(height, width);
-}
-
-int
-help_popup(int height, int width)
+get_help()
 {
 	WINDOW *win;
 
 	int win_height = 15;
 	int win_width = 30;
 	int line = 1;
+
+	int offset_y = LINES / 2;
+	int offset_x = COLS / 2;
 
 	win = newpad(win_height, win_width);
 
@@ -213,10 +201,10 @@ help_popup(int height, int width)
 	waddstr(win, " ^Y - live encryption");
 
 	prefresh(win, 0, 0,
-		height / 2 - win_height / 2,
-		width / 2 - win_width / 2,
-		height / 2 + win_height / 2,
-		width / 2 + win_width / 2);
+		offset_y - win_height / 2,
+		offset_x - win_width / 2,
+		offset_y + win_height / 2,
+		offset_x + win_width / 2);
 
 	wgetch(win);
 
@@ -230,9 +218,9 @@ help_popup(int height, int width)
 }
 
 int
-open_file(char *buf, int *size, int height, int width, bool from_arg)
+open_file(char **buf, int *size, bool from_arg)
 {
-	if (!from_arg && open_file_popup(height, width) == ERR) {
+	if (!from_arg && open_file_popup() == ERR) {
 		perror("open_file_popup");
 		return ERR;
 	}
@@ -249,9 +237,9 @@ open_file(char *buf, int *size, int height, int width, bool from_arg)
 	long len = ftell(fp);
 	rewind(fp);
 
-	if (len > BUFSIZ && len > (long)size) {
+	if (len > BUFSIZ && len > (long)*size) {
 		// Allocate more space for the buffer
-		char *tmp = realloc(buf, sizeof(char) * len);
+		char *tmp = realloc(*buf, sizeof(char) * len + 1);
 
 		if (tmp == NULL) {
 			perror("realloc");
@@ -259,34 +247,37 @@ open_file(char *buf, int *size, int height, int width, bool from_arg)
 			return ERR;
 		}
 
-		buf = tmp;
-		tmp = NULL;
-
-		memset(buf, 0, sizeof(char) * len);
+		*buf = tmp;
 	}
 
 	char ch;
-	*size = 0;
+	int i = 0;
 
 	while ((ch = fgetc(fp)) != EOF)
-		buf[(*size)++] = ch;	// err here?
+		(*buf)[i++] = ch;
 
+	(*buf)[i] = '\0';
+
+	*size = i;
 	fclose(fp);
 
 	return OK;
 }
 
 int
-open_file_popup(int height, int width)
+open_file_popup()
 {
 	WINDOW *win;
 
 	int win_height = 3;
 	int win_width = 42;
 
+	int offset_y = LINES / 2;
+	int offset_x = COLS / 2;
+
 	win = newwin(win_height, win_width,
-		height / 2 - win_height / 2,
-		width / 2 - win_width / 2);
+		offset_y - win_height / 2,
+		offset_x - win_width / 2);
 
 	if (win == NULL) {
 		perror("newwin");
@@ -318,9 +309,9 @@ open_file_popup(int height, int width)
 }
 
 int
-save_file(char *buf, int size, int height, int width)
+save_file(char *buf, int size)
 {
-	if (save_file_popup(height, width) == ERR) {
+	if (save_file_popup() == ERR) {
 		perror("save_file_popup");
 		return ERR;
 	}
@@ -341,16 +332,19 @@ save_file(char *buf, int size, int height, int width)
 }
 
 int
-save_file_popup(int height, int width)
+save_file_popup()
 {
 	WINDOW *win;
 
 	int win_height = 3;
 	int win_width = 42;
 
+	int offset_y = LINES / 2;
+	int offset_x = COLS / 2;
+
 	win = newwin(win_height, win_width,
-		height / 2 - win_height / 2,
-		width / 2 - win_width / 2);
+		offset_y - win_height / 2,
+		offset_x - win_width / 2);
 
 	if (win == NULL) {
 		perror("newwin");
