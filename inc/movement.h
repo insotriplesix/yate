@@ -1,30 +1,34 @@
 #ifndef __MOVEMENT_H__
 #define __MOVEMENT_H__
 
-#include <ncurses.h>
+#include "editor.h"
 
-inline void __attribute__ ((always_inline))
-move_left(int *y, int *x, int border)
+inline void
+__attribute__ ((always_inline))
+move_left()
 {
-	if (*x - 1 > border) wmove(win[EDIT_W], *y, --(*x));
+	if (content.x_pos - 1 > 0) content.x_pos--;
 }
 
-inline void __attribute__ ((always_inline))
-move_right(int *y, int *x, int border)
+inline void
+__attribute__ ((always_inline))
+move_right()
 {
-	if (*x + 1 < border) wmove(win[EDIT_W], *y, ++(*x));
+	if (content.x_pos + 1 < COLS - 1) content.x_pos++;
 }
 
-inline void __attribute__ ((always_inline))
-move_up(int *y, int *x, int border)
+inline void
+__attribute__ ((always_inline))
+move_up()
 {
-	if (*y - 1 > border) wmove(win[EDIT_W], --(*y), *x);
+	if (content.y_pos - 1 > 0) content.y_pos--;
 }
 
-inline void __attribute__ ((always_inline))
-move_down(int *y, int *x, int border)
+inline void
+__attribute__ ((always_inline))
+move_down()
 {
-	if (*y + 1 < border) wmove(win[EDIT_W], ++(*y), *x);
+	if (content.y_pos + 1 < LINES - 9) content.y_pos++;
 }
 
 #endif

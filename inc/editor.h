@@ -21,24 +21,34 @@
 #define CTRL_X 24
 #define CTRL_Y 25
 
+#define DEFPOS_X 1
+#define DEFPOS_Y 1
 #define NWINDOWS 3
-
-enum win_t { MENU_W, EDIT_W, INFO_W };
 
 WINDOW *win[NWINDOWS];
 
+enum win_t { MENU_W, EDIT_W, INFO_W };
 extern char filename[FILENAME_MAX];
 
-int change_theme();
-int change_theme_popup();
+int encryption;
 
-int get_extra();
-int get_help();
+struct win_cont_t {
+	int x_pos;
+	int y_pos;
+	size_t size;
+	char *data;
+};
 
-int open_file(char **buf, int *size, bool from_arg);
-int open_file_popup();
+struct win_cont_t content;
 
-int save_file(char *buf, int size);
-int save_file_popup();
+void horizontal_tab(void);
+void next_line(void);
+void print_char(int ch);
+void remove_char(void);
+
+void print_text(void);
+
+int open_file(bool from_arg);
+int save_file();
 
 #endif

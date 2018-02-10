@@ -3,8 +3,12 @@
 
 #include "editor.h"
 
-int init_ncurses();
-int init_colors();
-int init_windows();
+void finalize(void);
+void initialize(void);
+
+int init_colors(void);
+int init_gui(void);
+int init_ncurses(void);
+int init_windows(void);
 
 #endif
