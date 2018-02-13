@@ -2,15 +2,68 @@
 #include "gui.h"
 #include "movement.h"
 
-char filename[FILENAME_MAX];
+//char filename[FILENAME_MAX];
+
+void
+init_line(line_t *line)
+{
+	line->cur_size = 0;
+	line->max_size = LINE_MAX;
+	line->buf = calloc(LINE_MAX, sizeof(char));
+}
+
+void
+expand_line(line_t *line)
+{
+	size_t new_size = line->max_size * 2;
+	char *tmp = calloc(new_size, sizeof(char));
+
+	strcpy(tmp, line->buf);
+	free(line->buf);
+
+	line->buf = tmp;
+	line->max_size = new_size;
+}
+
+void
+append_char(line_t *line, char ch)
+{
+	insert_char(line, ch, line->cur_size);
+}
+
+void
+insert_char(line_t *line, char ch, size_t index)
+{
+	if (line->cur_size + 1 >= line->max_size)
+		expand_line(line);
+
+	for (size_t i = line->cur_size; i >= index; --i)
+		line->buf[i + 1] = line->buf[i];
+
+	line->buf[index] = ch;
+	line->cur_size++;
+}
+
+void
+remove_char(line_t *line, size_t index)
+{
+	for (size_t i = index; i < line->cur_size; ++i)
+		line->buf[i] = line->buf[i + 1];
+
+	line->buf[line->cur_size] = '\0';
+	line->cur_size--;
+}
 
 void
 horizontal_tab(void)
 {
-	size_t filebuf_pos = content.y_pos * COLS + content.x_pos;
+	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
 
-	if (content.size < BUFSIZ || filebuf_pos < content.size)
-		content.data[content.size++] = '\t';
+	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
+		content.data[content.buf_pos]) {
+		content.data[content.buf_pos] = '\t';
+		content.size++;
+	}
 
 	for (int i = 0; i < 4; ++i) move_right();
 }
@@ -18,13 +71,13 @@ horizontal_tab(void)
 void
 next_line(void)
 {
-	move_left();
-	waddch(win[EDIT_W], ' ');
+	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
 
-	size_t filebuf_pos = content.y_pos * COLS + content.x_pos;
-
-	if (content.size < BUFSIZ || filebuf_pos < content.size)
-		content.data[content.size++] = '\n';
+	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
+		content.data[content.buf_pos]) {
+		content.data[content.buf_pos] = '\n';
+		content.size++;
+	}
 
 	content.x_pos = DEFPOS_X;
 	content.y_pos++;
@@ -39,10 +92,13 @@ print_char(int ch)
 	if (encryption == TRUE)
 		ch ^= 1;
 
-	size_t filebuf_pos = content.y_pos * COLS + content.x_pos;
+	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
 
-	if (content.size < BUFSIZ || filebuf_pos < content.size)
-		content.data[content.size++] = (char) ch;
+	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
+		content.data[content.buf_pos]) {
+		content.data[content.buf_pos] = (char) ch;
+		content.size++;
+	}
 
 	if (content.x_pos + 1 < COLS - 1) {
 		waddch(win[EDIT_W], ch);
@@ -54,16 +110,22 @@ print_char(int ch)
 		content.y_pos++;
 	}
 }
-
+/*
 void
 remove_char(void)
 {
-	size_t filebuf_pos = content.y_pos * COLS + content.x_pos;
+	move_left();
+	waddch(win[EDIT_W], ' ');
 
-	if (content.size < BUFSIZ || filebuf_pos < content.size)
-		content.data[content.size--] = ' ';
+	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
+
+	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
+		content.data[content.buf_pos]) {
+		content.data[content.buf_pos] = ' ';
+		content.size++;
+	}
 }
-
+*/
 void
 print_text(void)
 {
@@ -156,9 +218,19 @@ save_file(void)
 		return OK;
 	}
 
+	mvwprintw(win[EDIT_W], 20, 1, "%s", content.data);
+
+//	size_t len = (content.size < BUFSIZ) ? BUFSIZ : content.size;
+
+//	for (size_t i = 0; i < len; ++i) {
+//		if (content.data[i] != ' ' && isalpha(content.data[i]))
+//			len = i;
+//	}
+
 	for (size_t i = 0; i < content.size; ++i)
 		fputc(content.data[i], fp);
 
+	fputc('\0', fp);
 	fclose(fp);
 
 	return OK;

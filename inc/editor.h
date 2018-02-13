@@ -25,28 +25,62 @@
 #define DEFPOS_Y 1
 #define NWINDOWS 3
 
+#define LINE_MAX 128
+#define PAGE_MAX (BUFSIZ / LINE_MAX)
+
 WINDOW *win[NWINDOWS];
 
 enum win_t { MENU_W, EDIT_W, INFO_W };
-extern char filename[FILENAME_MAX];
+//extern char filename[FILENAME_MAX];
 
 int encryption;
 
+struct line_t {
+	size_t cur_size;
+	size_t max_size;
+	char *buf;
+}
+
+struct page_t {
+	size_t lines_count;
+	line_t *line;
+}
+
 struct win_cont_t {
-	int x_pos;
-	int y_pos;
-	size_t size;
-	char *data;
+	size_t pages_count;
+	page_t *page;
+	char file[FILENAME_MAX];
+//	int x_pos;
+//	int y_pos;
+//	size_t buf_pos;
+//	size_t size;
+//	char *data;
 };
 
 struct win_cont_t content;
 
-void horizontal_tab(void);
-void next_line(void);
-void print_char(int ch);
-void remove_char(void);
+void init_line(line_t *line);
+void expand_line(line_t *line);
 
-void print_text(void);
+void append_char(line_t *line, char ch);
+void insert_char(line_t *line, char ch, size_t index);
+void remove_char(line_t *line, size_t index);
+
+void init_page(page_t *page, char *filename,
+void destroy_page(page_t *page);
+void expand_page(page_t *page);
+void print_page(page_t *page);
+
+void append_line(page_t *page);
+void insert_line(page_t *page, size_t index);
+void remove_line(page_t *page, size_t index);
+
+//void horizontal_tab(void);
+//void next_line(void);
+//void print_char(int ch);
+//void remove_char(void);
+
+//void print_text(void);
 
 int open_file(bool from_arg);
 int save_file();

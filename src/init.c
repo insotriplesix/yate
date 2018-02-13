@@ -92,6 +92,7 @@ init_windows(void)
 	// Init content
 	content.x_pos = DEFPOS_X;
 	content.y_pos = DEFPOS_Y;
+	content.buf_pos = 0;
 	content.size = 0;
 	content.data = calloc(BUFSIZ, sizeof(char));
 
