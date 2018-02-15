@@ -2,62 +2,11 @@
 #include "gui.h"
 #include "movement.h"
 
-//char filename[FILENAME_MAX];
-
-void
-init_line(line_t *line)
-{
-	line->cur_size = 0;
-	line->max_size = LINE_MAX;
-	line->buf = calloc(LINE_MAX, sizeof(char));
-}
-
-void
-expand_line(line_t *line)
-{
-	size_t new_size = line->max_size * 2;
-	char *tmp = calloc(new_size, sizeof(char));
-
-	strcpy(tmp, line->buf);
-	free(line->buf);
-
-	line->buf = tmp;
-	line->max_size = new_size;
-}
-
-void
-append_char(line_t *line, char ch)
-{
-	insert_char(line, ch, line->cur_size);
-}
-
-void
-insert_char(line_t *line, char ch, size_t index)
-{
-	if (line->cur_size + 1 >= line->max_size)
-		expand_line(line);
-
-	for (size_t i = line->cur_size; i >= index; --i)
-		line->buf[i + 1] = line->buf[i];
-
-	line->buf[index] = ch;
-	line->cur_size++;
-}
-
-void
-remove_char(line_t *line, size_t index)
-{
-	for (size_t i = index; i < line->cur_size; ++i)
-		line->buf[i] = line->buf[i + 1];
-
-	line->buf[line->cur_size] = '\0';
-	line->cur_size--;
-}
-
 void
 horizontal_tab(void)
 {
-	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
+	content.buf_pos = (content.y_pos - 1) * COLS +
+		(content.y_off * COLS) + content.x_pos;
 
 	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
 		content.data[content.buf_pos]) {
@@ -71,7 +20,8 @@ horizontal_tab(void)
 void
 next_line(void)
 {
-	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
+	content.buf_pos = (content.y_pos - 1) * COLS +
+		(content.y_off * COLS) + content.x_pos;
 
 	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
 		content.data[content.buf_pos]) {
@@ -92,7 +42,8 @@ print_char(int ch)
 	if (encryption == TRUE)
 		ch ^= 1;
 
-	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
+	content.buf_pos = (content.y_pos - 1) * COLS +
+		(content.y_off * COLS) + content.x_pos;
 
 	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
 		content.data[content.buf_pos]) {
@@ -110,14 +61,15 @@ print_char(int ch)
 		content.y_pos++;
 	}
 }
-/*
+
 void
 remove_char(void)
 {
 	move_left();
 	waddch(win[EDIT_W], ' ');
 
-	content.buf_pos = (content.y_pos - 1) * COLS + content.x_pos;
+	content.buf_pos = (content.y_pos - 1) * COLS +
+		(content.y_off * COLS) + content.x_pos;
 
 	if ((content.size < BUFSIZ || content.buf_pos < content.size) &&
 		content.data[content.buf_pos]) {
@@ -125,10 +77,13 @@ remove_char(void)
 		content.size++;
 	}
 }
-*/
+
 void
 print_text(void)
 {
+	int prev_x_pos = content.x_pos;
+	int prev_y_pos = content.y_pos;
+
 	content.x_pos = DEFPOS_X;
 	content.y_pos = DEFPOS_Y;
 
@@ -140,34 +95,82 @@ print_text(void)
 
 	wmove(win[EDIT_W], content.y_pos, content.x_pos);
 
+	size_t edit_win_size = (LINES - 9) * (COLS - 2);
+	size_t print_size = (content.size < edit_win_size)
+		? content.size : edit_win_size;
+
+	int nl_count = 0;
+	int offset = content.y_off * COLS;
+
 	// Dump text
-	for (size_t i = 0; i < content.size; ++i) {
-		if (content.data[i] == '\n') {
+	for (size_t i = 0; i < print_size && nl_count < LINES - 10; ++i) {
+		if (content.data[i + offset] == '\n') {
 			content.x_pos = DEFPOS_X;
 			content.y_pos++;
 			wmove(win[EDIT_W], content.y_pos, content.x_pos);
+			nl_count++;
 		} else {
-			waddch(win[EDIT_W], content.data[i]);
+			waddch(win[EDIT_W], content.data[i + offset]);
 			move_right();
 		}
 	}
 
-	content.x_pos = DEFPOS_X;
-	content.y_pos = DEFPOS_Y;
+//	content.x_pos = DEFPOS_X;
+//	content.y_pos = DEFPOS_Y;
+	content.x_pos = prev_x_pos;
+	content.y_pos = prev_y_pos;
+}
+
+
+char **
+split_s(char *str, const char delim)
+{
+	char **result = NULL;
+	char *tmp = str;
+	char *last_delim = NULL;
+	size_t count = 0;
+
+	char d[2] = { delim, '\0' };
+
+	while (*tmp) {
+		if (delim == *tmp) {
+			count++;
+			last_delim = tmp;
+		}
+
+		tmp++;
+	}
+
+	count += last_delim < (str + strlen(str) - 1);
+	count++;
+
+	result = malloc(sizeof(char *) * count);
+
+	if (result) {
+		size_t idx = 0;
+		char *tok = strtok(str, d);
+
+		while (tok) {
+			assert(idx < count);
+			*(result + idx++) = strdup(tok);
+			tok = strtok(0, d);
+		}
+
+		assert (idx == count - 1);
+		*(result + idx) = 0;
+	}
+
+	return result;
 }
 
 int
-open_file(bool from_arg)
+open_file(void)
 {
-	if (!from_arg && open_file_popup() == ERR) {
-		perror("open_file_popup");
-		return ERR;
-	}
-
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = fopen(content.file.name, "r");
 
 	if (fp == NULL) {	// MOVE2 INFO BAR
-		fprintf(stderr, "Error opening file '%s', skipped.", filename);
+		fprintf(stderr, "Error opening file '%s', skipped.",
+			content.file.name);
 		return OK;
 	}
 
@@ -192,6 +195,17 @@ open_file(bool from_arg)
 	char ch;
 	int i = 0;
 
+	struct stat sb;
+
+	// MOVE2 INFO BAR
+	if (lstat(content.file.name, &sb) == ERR) {
+		perror("lstat");
+		return OK;
+	}
+
+	content.file.size = sb.st_size;
+	content.file.mode = sb.st_mode;
+
 	while ((ch = fgetc(fp)) != EOF)
 		content.data[i++] = ch;
 
@@ -200,7 +214,21 @@ open_file(bool from_arg)
 	content.size = i;
 	fclose(fp);
 
+	wclear(win[INFO_W]);
+	draw_window(INFO_W);
+
 	return OK;
+}
+
+int
+open_file_ed(void)
+{
+	if (open_file_popup() == ERR) {
+		perror("open_file_popup");
+		return ERR;
+	}
+
+	return open_file();
 }
 
 int
@@ -211,10 +239,11 @@ save_file(void)
 		return ERR;
 	}
 
-	FILE *fp = fopen(filename, "w");
+	FILE *fp = fopen(content.file.name, "w");
 
 	if (fp == NULL) {	// MV2INFOBAR
-		fprintf(stderr, "Error opening file '%s', skipped.", filename);
+		fprintf(stderr, "Error opening file '%s', skipped.",
+			content.file.name);
 		return OK;
 	}
 

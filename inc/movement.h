@@ -24,6 +24,7 @@ __attribute__ ((always_inline))
 move_up()
 {
 	if (content.y_pos - 1 > 0) content.y_pos--;
+	else if (content.y_off > 0) content.y_off--;
 	wmove(win[EDIT_W], content.y_pos, content.x_pos);
 }
 
@@ -32,6 +33,7 @@ __attribute__ ((always_inline))
 move_down()
 {
 	if (content.y_pos + 1 < LINES - 9) content.y_pos++;
+	else content.y_off++;
 	wmove(win[EDIT_W], content.y_pos, content.x_pos);
 }
 

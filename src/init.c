@@ -12,10 +12,11 @@ finalize(void)
 		delwin(win[i]);
 
 	endwin();
+	save_config();
 }
 
 void
-initialize(void)
+initialize(int argc, char *argv[])
 {
 	if (init_ncurses() | init_colors() | init_windows() | init_gui()) {
 		endwin();
@@ -30,7 +31,41 @@ initialize(void)
 		exit(EXIT_FAILURE);
 	}
 
+	if (argc > 2) {
+		endwin();
+		fprintf(stderr, "Usage: ./yate [file]\n");
+		exit(EXIT_FAILURE);
+	} else if (argc == 2) {
+		init_content(argv[1]);
+		open_file();
+		print_text();
+	} else {
+		init_content("yate_untitled.txt");
+	}
+
+	wclear(win[INFO_W]);
+	draw_window(INFO_W);
+
+	load_config();
+
 	wmove(win[EDIT_W], DEFPOS_Y, DEFPOS_X);
+}
+
+int
+init_content(char *fname)
+{
+	content.x_pos = DEFPOS_X;
+	content.y_pos = DEFPOS_Y;
+	content.y_off = 0;
+	content.buf_pos = 0;
+	content.size = 0;
+
+	strcpy(content.file.name, fname);
+	content.data = calloc(BUFSIZ, sizeof(char));
+
+	encryption = FALSE;
+
+	return OK;
 }
 
 int
@@ -89,14 +124,46 @@ init_windows(void)
 	// Enable scrolling, func keys, arrows etc.
 	keypad(win[EDIT_W], TRUE);
 
-	// Init content
-	content.x_pos = DEFPOS_X;
-	content.y_pos = DEFPOS_Y;
-	content.buf_pos = 0;
-	content.size = 0;
-	content.data = calloc(BUFSIZ, sizeof(char));
+	return OK;
+}
 
-	encryption = FALSE;
+int
+load_config(void)
+{
+	FILE *fp = fopen(CONFIG_FILE, "r");
+	if (fp == NULL)	return ERR;
+
+	char line[LINE_MAX];
+	int theme = 0;
+
+	while ((fgets(line, LINE_MAX, fp)) != NULL) {
+		if (strncmp(line, "theme", 5) == 0) {
+			char **str = split_s(line, ' ');
+
+			if (str != NULL) {
+				theme = (int)str[1][0];
+				change_theme(theme);
+			}
+
+			for (int i = 0; i < 2; ++i)
+				free(str[i]);
+			free(str);
+		}
+	}
+
+	fclose(fp);
+
+	return OK;
+}
+
+int
+save_config(void)
+{
+	FILE *fp = fopen(CONFIG_FILE, "w");
+	if (fp == NULL)	return ERR;
+
+	fprintf(fp, "theme %c\n", current_theme);
+	fclose(fp);
 
 	return OK;
 }

@@ -1,12 +1,17 @@
 #ifndef __EDITOR_H__
 #define __EDITOR_H__
 
+#include <assert.h>
 #include <ctype.h>
 #include <limits.h>
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
+
+#define CONFIG_FILE ".config"
 
 #define KEY_BS '\b'
 #define KEY_CR '\r'
@@ -25,64 +30,42 @@
 #define DEFPOS_Y 1
 #define NWINDOWS 3
 
-#define LINE_MAX 128
-#define PAGE_MAX (BUFSIZ / LINE_MAX)
-
 WINDOW *win[NWINDOWS];
 
 enum win_t { MENU_W, EDIT_W, INFO_W };
-//extern char filename[FILENAME_MAX];
 
 int encryption;
+char current_theme;
 
-struct line_t {
-	size_t cur_size;
-	size_t max_size;
-	char *buf;
-}
-
-struct page_t {
-	size_t lines_count;
-	line_t *line;
-}
+typedef struct {
+	char name[FILENAME_MAX];
+	size_t size;
+	unsigned long mode;
+} filestat_t;
 
 struct win_cont_t {
-	size_t pages_count;
-	page_t *page;
-	char file[FILENAME_MAX];
-//	int x_pos;
-//	int y_pos;
-//	size_t buf_pos;
-//	size_t size;
-//	char *data;
+	int x_pos;
+	int y_pos;
+	int y_off;
+	size_t buf_pos;
+	size_t size;
+	char *data;
+	filestat_t file;
 };
 
 struct win_cont_t content;
 
-void init_line(line_t *line);
-void expand_line(line_t *line);
+void horizontal_tab(void);
+void next_line(void);
+void print_char(int ch);
+void remove_char(void);
 
-void append_char(line_t *line, char ch);
-void insert_char(line_t *line, char ch, size_t index);
-void remove_char(line_t *line, size_t index);
+void print_text(void);
 
-void init_page(page_t *page, char *filename,
-void destroy_page(page_t *page);
-void expand_page(page_t *page);
-void print_page(page_t *page);
+char **split_s(char *str, const char delim);
 
-void append_line(page_t *page);
-void insert_line(page_t *page, size_t index);
-void remove_line(page_t *page, size_t index);
-
-//void horizontal_tab(void);
-//void next_line(void);
-//void print_char(int ch);
-//void remove_char(void);
-
-//void print_text(void);
-
-int open_file(bool from_arg);
-int save_file();
+int open_file(void);
+int open_file_ed(void);
+int save_file(void);
 
 #endif

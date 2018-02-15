@@ -5,35 +5,20 @@
 
 // TODO 1: fix scrolling
 // TODO 2: hexeditor
-// TODO 3: info bar
-// TODO 4: deal with resizing
-// TODO 5: valgrind -v --leak-check=full ./yate FILE
-// TODO 6: add .config file (win size, theme etc)
+// TODO 3: deal with saving
+// TODO 4: valgrind -v --leak-check=full --show-leak-kinds=all ./yate [file]
 
 int
 main(int argc, char *argv[])
 {
 	int rc = OK;
 
-	initialize();
-
-	if (argc == 2) {
-		strcpy(filename, argv[1]);
-		rc = open_file(TRUE);
-
-		if (rc == ERR)
-			return ERR;
-
-		print_text();
-
-		wmove(win[EDIT_W], content.y_pos, content.x_pos);
-		wrefresh(win[EDIT_W]);
-	}
+	initialize(argc, argv);
 
 	while (0x1) {
+		update_gui();
 		rc = readkey();
 		if (rc == ERR) break;
-		update_gui();
 	}
 
 	finalize();

@@ -13,16 +13,16 @@ draw_info(enum win_t wtype)
 
 	int offset = 4;
 
-	mvwprintw(win[wtype], 2, offset, "FILE: %s", filename);
-	offset += 10 + strlen(filename);
-	mvwprintw(win[wtype], 2, offset, "SIZE: %3d b", 0);
+	mvwprintw(win[wtype], 2, offset, "FILE: %s", content.file.name);
+	offset += 10 + strlen(content.file.name);
+	mvwprintw(win[wtype], 2, offset, "SIZE: %lld b", content.file.size);
 	offset += 15;
-	mvwprintw(win[wtype], 2, offset, "TYPE: %c", 'r');
-	offset += 11;
-	mvwprintw(win[wtype], 2, offset, "ENCRYPT: %c", 'n');
+	mvwprintw(win[wtype], 2, offset, "MODE: %lo", content.file.mode);
+	offset += 16;
+	mvwprintw(win[wtype], 2, offset, "ENCRYPT: %c", encryption ? 'y' : 'n');
 	offset += 14;
-	mvwprintw(win[wtype], 2, offset, "STATUS: %c", 'n');
-	mvwprintw(win[wtype], 2, COLS - 10, "v1.0");
+	mvwprintw(win[wtype], 2, offset, "ERROR: %c", 'n');
+	mvwprintw(win[wtype], 2, COLS - 10, "v1.1b");
 
 	wattron(win[wtype], BORDER_CLR);
 	mvwprintw(win[wtype], 0, COLS / 2 - 6, " %3d : %3d ", 1, 1);
@@ -74,16 +74,24 @@ draw_window(enum win_t wtype)
 }
 
 int
-change_theme(void)
+change_theme_ed(void)
+{
+	int theme = change_theme_popup();
+	if (theme == ERR) return ERR;
+
+	return change_theme(theme);
+}
+
+int
+change_theme(int theme)
 {
 	int fg_field, bg_field,
 		fg_menu, bg_menu,
 		fg_popup, bg_popup;
 
-	int choice = change_theme_popup();
-	if (choice == ERR) return ERR;
+	current_theme = (char)theme;
 
-	switch ((char)choice) {
+	switch ((char)theme) {
 		case '0': // default
 			fg_menu = COLOR_BLACK, bg_menu = COLOR_YELLOW;
 			fg_field = COLOR_WHITE, bg_field = COLOR_BLUE;
@@ -247,7 +255,7 @@ get_help(void)
 	curs_set(0);
 
 	wmove(win, line++, win_width / 3);
-	waddstr(win, "YATE v1.0");
+	waddstr(win, "YATE v1.1b");
 	wmove(win, line++, 1);
 	waddstr(win, "");
 	wmove(win, line++, 1);
@@ -317,11 +325,11 @@ open_file_popup(void)
 
 	mvwaddstr(win, 1, 1, " Enter file name: ");
 	wrefresh(win);
-	memset(filename, '\0', FILENAME_MAX);
+	memset(content.file.name, '\0', FILENAME_MAX);
 	scrollok(win, TRUE);
 	idlok(win, TRUE);
 	nonl();
-	mvwgetstr(win, 1, 19, filename);
+	mvwgetstr(win, 1, 19, content.file.name);
 
 	noecho();
 
@@ -361,8 +369,8 @@ save_file_popup(void)
 
 	mvwaddstr(win, 1, 1, " Enter file name: ");
 	wrefresh(win);
-	memset(filename, '\0', FILENAME_MAX);
-	mvwgetstr(win, 1, 19, filename);
+	memset(content.file.name, '\0', FILENAME_MAX);
+	mvwgetstr(win, 1, 19, content.file.name);
 
 	noecho();
 

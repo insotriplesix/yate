@@ -13,7 +13,8 @@ void draw_info(enum win_t wtype);
 void draw_menu(enum win_t wtype);
 void draw_window(enum win_t wtype);
 
-int change_theme(void);
+int change_theme(int theme);
+int change_theme_ed(void);
 int change_theme_popup(void);
 
 int get_extra_opt(void);
@@ -25,8 +26,9 @@ int save_file_popup(void);
 inline void __attribute__ ((always_inline))
 update_gui(void)
 {
-	mvwprintw(win[INFO_W], 0, COLS / 2 - 6, " %3d : %3d ",
-		content.y_pos, content.x_pos);
+	mvwprintw(win[INFO_W], 0, COLS / 2 - 12,
+		" y: %4d, x: %4d, o: %4d ", content.y_pos,
+		content.x_pos, content.y_off);
 
 	for (int i = 0; i < NWINDOWS; ++i) {
 		touchwin(win[i]);

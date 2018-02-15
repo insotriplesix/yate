@@ -40,7 +40,7 @@ readkey(void)
 			break;
 		case KEY_F(4):
 		case CTRL_O:
-			rc = open_file(FALSE);
+			rc = open_file_ed();
 			if (rc == ERR) break;
 			print_text();
 			break;
@@ -61,15 +61,16 @@ readkey(void)
 			finalize();
 			exit(EXIT_SUCCESS);
 			break;
-/*			case CTRL_W:
+			/*case CTRL_W:
 			rc = hex_editor(win, height, width);
-			break;
-*/
+			break; */
 		case CTRL_G:
-			rc = change_theme();
+			rc = change_theme_ed();
 			break;
 		case CTRL_Y:
 			encryption ^= TRUE;
+			wclear(win[INFO_W]);
+			draw_window(INFO_W);
 			break;
 		default:
 			print_char(ch);
