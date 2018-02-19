@@ -76,22 +76,22 @@ draw_window(enum win_t wtype)
 int
 change_theme_ed(void)
 {
-	int theme = change_theme_popup();
+	char theme = change_theme_popup();
 	if (theme == ERR) return ERR;
 
 	return change_theme(theme);
 }
 
 int
-change_theme(int theme)
+change_theme(char theme)
 {
 	int fg_field, bg_field,
 		fg_menu, bg_menu,
 		fg_popup, bg_popup;
 
-	current_theme = (char)theme;
+	current_theme = theme;
 
-	switch ((char)theme) {
+	switch (theme) {
 		case '0': // default
 			fg_menu = COLOR_BLACK, bg_menu = COLOR_YELLOW;
 			fg_field = COLOR_WHITE, bg_field = COLOR_BLUE;
@@ -263,7 +263,7 @@ get_help(void)
 	wmove(win, line++, 1);
 	waddstr(win, " F4, ^O - open file");
 	wmove(win, line++, 1);
-	waddstr(win, " F5, ^K - save to file");
+	waddstr(win, " F5, ^S - save to file");
 	wmove(win, line++, 1);
 	waddstr(win, " F6, ^E - extra options");
 	wmove(win, line++, 1);

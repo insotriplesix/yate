@@ -6,6 +6,7 @@ char filename[FILENAME_MAX];
 void
 finalize(void)
 {
+	disable_raw_mode();
 	free(content.data);
 
 	for (int i = 0; i < NWINDOWS; ++i)
@@ -47,6 +48,7 @@ initialize(int argc, char *argv[])
 	draw_window(INFO_W);
 
 	load_config();
+	enable_raw_mode();
 
 	wmove(win[EDIT_W], DEFPOS_Y, DEFPOS_X);
 }
@@ -134,14 +136,14 @@ load_config(void)
 	if (fp == NULL)	return ERR;
 
 	char line[LINE_MAX];
-	int theme = 0;
+	char theme = 0;
 
 	while ((fgets(line, LINE_MAX, fp)) != NULL) {
 		if (strncmp(line, "theme", 5) == 0) {
 			char **str = split_s(line, ' ');
 
 			if (str != NULL) {
-				theme = (int)str[1][0];
+				theme = str[1][0];
 				change_theme(theme);
 			}
 

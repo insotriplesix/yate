@@ -45,7 +45,7 @@ readkey(void)
 			print_text();
 			break;
 		case KEY_F(5):
-		case CTRL_K:
+		case CTRL_S:
 			rc = save_file();
 			break;
 		case KEY_F(6):

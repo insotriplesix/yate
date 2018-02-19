@@ -9,9 +9,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <termios.h>
 #include <unistd.h>
 
-#define CONFIG_FILE ".config"
+#define CONFIG_FILE "/home/saboteur/Desktop/Programming/github/YATE/.config"
 
 #define KEY_BS '\b'
 #define KEY_CR '\r'
@@ -21,8 +22,9 @@
 #define CTRL_E 5
 #define CTRL_F 6
 #define CTRL_G 7
-#define CTRL_K 11
 #define CTRL_O 15
+#define CTRL_S 19
+#define CTRL_W 23
 #define CTRL_X 24
 #define CTRL_Y 25
 
@@ -36,6 +38,8 @@ enum win_t { MENU_W, EDIT_W, INFO_W };
 
 int encryption;
 char current_theme;
+
+struct termios term_attr;
 
 typedef struct {
 	char name[FILENAME_MAX];
@@ -54,6 +58,9 @@ struct win_cont_t {
 };
 
 struct win_cont_t content;
+
+void enable_raw_mode(void);
+void disable_raw_mode(void);
 
 void horizontal_tab(void);
 void next_line(void);

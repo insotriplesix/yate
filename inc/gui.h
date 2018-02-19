@@ -13,7 +13,7 @@ void draw_info(enum win_t wtype);
 void draw_menu(enum win_t wtype);
 void draw_window(enum win_t wtype);
 
-int change_theme(int theme);
+int change_theme(char theme);
 int change_theme_ed(void);
 int change_theme_popup(void);
 
