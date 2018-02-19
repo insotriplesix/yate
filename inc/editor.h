@@ -14,20 +14,6 @@
 
 #define CONFIG_FILE "/home/saboteur/Desktop/Programming/github/YATE/.config"
 
-#define KEY_BS '\b'
-#define KEY_CR '\r'
-#define KEY_HT '\t'
-#define KEY_NL '\n'
-
-#define CTRL_E 5
-#define CTRL_F 6
-#define CTRL_G 7
-#define CTRL_O 15
-#define CTRL_S 19
-#define CTRL_W 23
-#define CTRL_X 24
-#define CTRL_Y 25
-
 #define DEFPOS_X 1
 #define DEFPOS_Y 1
 #define NWINDOWS 3

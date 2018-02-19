@@ -275,9 +275,11 @@ get_help(void)
 	wmove(win, line++, 1);
 	waddstr(win, "--- ext --------------------");
 	wmove(win, line++, 1);
-	waddstr(win, " ^G - change theme");
+	waddstr(win, " ^W - show hex editor");
 	wmove(win, line++, 1);
 	waddstr(win, " ^Y - live encryption");
+	wmove(win, line++, 1);
+	waddstr(win, " ^G - change theme");
 
 	prefresh(win, 0, 0,
 		offset_y - win_height / 2,

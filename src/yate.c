@@ -3,7 +3,6 @@
 #include "init.h"
 #include "readkey.h"
 
-// TODO 0: disable control keys
 // TODO 1: fix scrolling
 // TODO 2: hexeditor
 // TODO 3: deal with saving
