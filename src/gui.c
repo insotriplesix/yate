@@ -13,8 +13,23 @@ draw_info(enum win_t wtype)
 
 	int offset = 4;
 
-	mvwprintw(win[wtype], 2, offset, "FILE: %s", content.file.name);
-	offset += 10 + strlen(content.file.name);
+	long len = strlen(content.file.name);
+	char fname[FILENAME_MAX];
+
+	if (len > 16) {
+		strncpy(fname, content.file.name + (len - 16),
+			sizeof(char) * 19);
+		fname[0] = '.';
+		fname[1] = '.';
+		fname[2] = '.';
+		fname[16] = '\0';
+		mvwprintw(win[wtype], 2, offset, "FILE: %s", fname);
+		offset += 26;
+	} else {
+		mvwprintw(win[wtype], 2, offset, "FILE: %s", content.file.name);
+		offset += 10 + strlen(content.file.name);
+	}
+
 	mvwprintw(win[wtype], 2, offset, "SIZE: %lld b", content.file.size);
 	offset += 15;
 	mvwprintw(win[wtype], 2, offset, "MODE: %lo", content.file.mode);
