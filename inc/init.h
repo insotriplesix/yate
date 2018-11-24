@@ -12,6 +12,7 @@ int init_gui(void);
 int init_ncurses(void);
 int init_windows(void);
 
+int get_config(void);
 int load_config(void);
 int save_config(void);
 

@@ -12,11 +12,11 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define CONFIG_FILE "/home/saboteur/Programming/github/YATE/.config"
-
 #define DEFPOS_X 1
 #define DEFPOS_Y 1
 #define NWINDOWS 3
+
+char CONFIG_PATH[PATH_MAX + FILENAME_MAX + 1];
 
 WINDOW *win[NWINDOWS];
 

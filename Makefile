@@ -14,5 +14,8 @@ all: clean $(EXEC)
 $(EXEC):
 	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) $(LDLIBS) -o $(EXEC)
 
+valrun:
+	valgrind -v --leak-check=full --show-leak-kinds=all ./$(EXEC) LICENSE
+
 clean:
 	rm -f $(EXEC)
