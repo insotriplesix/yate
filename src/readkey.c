@@ -16,9 +16,13 @@ readkey(void)
 			break;
 		case KEY_UP:
 			move_up();
+			if (content.y_pos == DEFPOS_Y && content.y_off > 0)
+				print_text();
 			break;
 		case KEY_DOWN:
 			move_down();
+			if (content.y_pos == LINES - 10)
+				print_text();
 			break;
 		case KEY_HOME:
 			content.x_pos = DEFPOS_X;

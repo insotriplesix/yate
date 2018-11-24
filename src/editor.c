@@ -121,23 +121,23 @@ print_text(void)
 		? content.size : edit_win_size;
 
 	int nl_count = 0;
-	int offset = content.y_off * COLS;
+
+	// THIS IS WHAT THA REAL "KOSTYL'" IS MUHFUKKUH !11 + it`s lil' buggy ;)
+	int offset = content.y_off * COLS - COLS;
 
 	// Dump text
 	for (size_t i = 0; i < print_size && nl_count < LINES - 10; ++i) {
-		if (content.data[i + offset] == '\n') {
+		if (content.data[i + (offset < 0 ? 0 : offset)] == '\n') {
 			content.x_pos = DEFPOS_X;
 			content.y_pos++;
 			wmove(win[EDIT_W], content.y_pos, content.x_pos);
 			nl_count++;
 		} else {
-			waddch(win[EDIT_W], content.data[i + offset]);
+			waddch(win[EDIT_W], content.data[i + (offset < 0 ? 0 : offset)]);
 			move_right();
 		}
 	}
 
-//	content.x_pos = DEFPOS_X;
-//	content.y_pos = DEFPOS_Y;
 	content.x_pos = prev_x_pos;
 	content.y_pos = prev_y_pos;
 }
