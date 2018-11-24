@@ -55,8 +55,6 @@ void remove_char(void);
 
 void print_text(void);
 
-char **split_s(char *str, const char delim);
-
 int open_file(void);
 int open_file_ed(void);
 int save_file(void);

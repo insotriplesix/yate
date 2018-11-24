@@ -142,48 +142,6 @@ print_text(void)
 	content.y_pos = prev_y_pos;
 }
 
-
-char **
-split_s(char *str, const char delim)
-{
-	char **result = NULL;
-	char *tmp = str;
-	char *last_delim = NULL;
-	size_t count = 0;
-
-	char d[2] = { delim, '\0' };
-
-	while (*tmp) {
-		if (delim == *tmp) {
-			count++;
-			last_delim = tmp;
-		}
-
-		tmp++;
-	}
-
-	count += last_delim < (str + strlen(str) - 1);
-	count++;
-
-	result = malloc(sizeof(char *) * count);
-
-	if (result) {
-		size_t idx = 0;
-		char *tok = strtok(str, d);
-
-		while (tok) {
-			assert(idx < count);
-			*(result + idx++) = strdup(tok);
-			tok = strtok(0, d);
-		}
-
-		assert (idx == count - 1);
-		*(result + idx) = 0;
-	}
-
-	return result;
-}
-
 int
 open_file(void)
 {
