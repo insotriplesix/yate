@@ -1,6 +1,30 @@
 #include "gui.h"
 
 void
+update_gui(void)
+{
+	mvwprintw(win[INFO_W], 0, COLS / 2 - 16,
+		" y: %3d, x: %3d, yo: %4d, xo: %4d ",
+		content.y_pos, content.x_pos,
+		content.y_off, content.x_off);
+
+	wclear(win[EDIT_W]);
+	wattron(win[EDIT_W], BORDER_CLR);
+	box(win[EDIT_W], ACS_VLINE, ACS_HLINE);
+	wattroff(win[EDIT_W], BORDER_CLR);
+
+	for (int i = 0; i < NWINDOWS; ++i) {
+		touchwin(win[i]);
+		wnoutrefresh(win[i]);
+	}
+
+	print_text();
+
+	wmove(win[EDIT_W], content.y_pos, content.x_pos);
+	doupdate();
+}
+
+void
 draw_edit(enum win_t wtype)
 {
 	wbkgd(win[wtype], EDIT_CLR);
@@ -37,10 +61,9 @@ draw_info(enum win_t wtype)
 	mvwprintw(win[wtype], 2, offset, "ENCRYPT: %c", encryption ? 'y' : 'n');
 	offset += 14;
 	mvwprintw(win[wtype], 2, offset, "ERROR: %c", 'n');
-	mvwprintw(win[wtype], 2, COLS - 10, "v1.1b");
+	mvwprintw(win[wtype], 2, COLS - 10, "v1.3b");
 
 	wattron(win[wtype], BORDER_CLR);
-	mvwprintw(win[wtype], 0, COLS / 2 - 6, " %3d : %3d ", 1, 1);
 }
 
 void
@@ -270,7 +293,7 @@ get_help(void)
 	curs_set(0);
 
 	wmove(win, line++, win_width / 3);
-	waddstr(win, "YATE v1.1b");
+	waddstr(win, "YATE v1.3b");
 	wmove(win, line++, 1);
 	waddstr(win, "");
 	wmove(win, line++, 1);

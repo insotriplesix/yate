@@ -14,7 +14,12 @@
 
 #define DEFPOS_X 1
 #define DEFPOS_Y 1
+
+#define LIMIT_X (COLS - 2)
+#define LIMIT_Y (LINES - 10)
+
 #define NWINDOWS 3
+#define YATE_TABSIZE 4
 
 char CONFIG_PATH[PATH_MAX + FILENAME_MAX + 1];
 
@@ -33,13 +38,18 @@ typedef struct {
 	unsigned long mode;
 } filestat_t;
 
+typedef struct {
+	int length;
+	char *chars;
+} row_t;
+
 struct win_cont_t {
 	int x_pos;
 	int y_pos;
+	int x_off;
 	int y_off;
-	size_t buf_pos;
-	size_t size;
-	char *data;
+	int nrows;
+	row_t *row;
 	filestat_t file;
 };
 
@@ -48,15 +58,22 @@ struct win_cont_t content;
 void enable_raw_mode(void);
 void disable_raw_mode(void);
 
+int insert_row(int idx, char *line, size_t len);
+char *rows_to_string(size_t *buflen);
+
+void init_content(void);
+void free_content(void);
+
 void horizontal_tab(void);
-void next_line(void);
-void print_char(int ch);
-void remove_char(void);
+int next_line(void);
+int insert_char(int ch);
+int remove_char(void);
 
 void print_text(void);
 
 int open_file(void);
 int open_file_ed(void);
 int save_file(void);
+int save_file_ed(void);
 
 #endif

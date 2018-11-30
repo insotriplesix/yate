@@ -7,7 +7,12 @@ void
 finalize(void)
 {
 	disable_raw_mode();
-	free(content.data);
+
+	if (content.nrows != 0)
+		free_content();
+//	for (int i = 0; i < content.nrows; ++i)
+//		free(content.row[i].chars);
+//	free(content.row);
 
 	for (int i = 0; i < NWINDOWS; ++i)
 		delwin(win[i]);
@@ -37,11 +42,12 @@ initialize(int argc, char *argv[])
 		fprintf(stderr, "Usage: ./yate [file]\n");
 		exit(EXIT_FAILURE);
 	} else if (argc == 2) {
-		init_content(argv[1]);
+		strcpy(content.file.name, argv[1]);
+		init_content();
 		open_file();
-		print_text();
 	} else {
-		init_content("yate_untitled.txt");
+		strcpy(content.file.name, "yate_untitled.txt");
+		init_content();
 	}
 
 	wclear(win[INFO_W]);
@@ -56,23 +62,6 @@ initialize(int argc, char *argv[])
 	enable_raw_mode();
 
 	wmove(win[EDIT_W], DEFPOS_Y, DEFPOS_X);
-}
-
-int
-init_content(char *fname)
-{
-	content.x_pos = DEFPOS_X;
-	content.y_pos = DEFPOS_Y;
-	content.y_off = 0;
-	content.buf_pos = 0;
-	content.size = 0;
-
-	strcpy(content.file.name, fname);
-	content.data = calloc(BUFSIZ, sizeof(char));
-
-	encryption = FALSE;
-
-	return OK;
 }
 
 int

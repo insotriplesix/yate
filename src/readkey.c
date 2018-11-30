@@ -16,28 +16,30 @@ readkey(void)
 			break;
 		case KEY_UP:
 			move_up();
-			if (content.y_pos == DEFPOS_Y && content.y_off > 0)
-				print_text();
 			break;
 		case KEY_DOWN:
 			move_down();
-			if (content.y_pos == LINES - 10)
-				print_text();
 			break;
 		case KEY_HOME:
-			content.x_pos = DEFPOS_X;
+			move_home();
 			break;
 		case KEY_END:
-			content.x_pos = COLS - 2;
+			move_end();
+			break;
+		case KEY_NPAGE:
+			move_npage();
+			break;
+		case KEY_PPAGE:
+			move_ppage();
 			break;
 		case KEY_DC:
 		case KEY_BS:
 		case KEY_BACKSPACE:
-			remove_char();
+			rc = remove_char();
 			break;
 		case KEY_ENTER:
 		case KEY_NL:
-			next_line();
+			rc = next_line();
 			break;
 		case KEY_HT:
 			horizontal_tab();
@@ -45,12 +47,10 @@ readkey(void)
 		case KEY_F(4):
 		case CTRL_O:
 			rc = open_file_ed();
-			if (rc == ERR) break;
-			print_text();
 			break;
 		case KEY_F(5):
 		case CTRL_S:
-			rc = save_file();
+			rc = save_file_ed();
 			break;
 		case KEY_F(6):
 		case CTRL_E:
@@ -77,7 +77,7 @@ readkey(void)
 			draw_window(INFO_W);
 			break;
 		default:
-			print_char(ch);
+			rc = insert_char(ch);
 	}
 
 	return rc;

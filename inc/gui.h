@@ -23,20 +23,6 @@ int get_help(void);
 int open_file_popup(void);
 int save_file_popup(void);
 
-inline void __attribute__ ((always_inline))
-update_gui(void)
-{
-	mvwprintw(win[INFO_W], 0, COLS / 2 - 12,
-		" y: %4d, x: %4d, o: %4d ", content.y_pos,
-		content.x_pos, content.y_off);
-
-	for (int i = 0; i < NWINDOWS; ++i) {
-		touchwin(win[i]);
-		wnoutrefresh(win[i]);
-	}
-
-	wmove(win[EDIT_W], content.y_pos, content.x_pos);
-	doupdate();
-}
+void update_gui(void);
 
 #endif
