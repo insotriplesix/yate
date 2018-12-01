@@ -208,6 +208,7 @@ change_theme_popup(void)
 		offset_x + win_width / 2);
 
 	int choice = wgetch(win);
+	flushinp();
 
 	wclear(win);
 	wrefresh(win);
@@ -256,6 +257,7 @@ get_extra_opt(void)
 		offset_x + win_width);
 
 	wgetch(win);
+	flushinp();
 
 	wclear(win);
 	wrefresh(win);
@@ -326,6 +328,7 @@ get_help(void)
 		offset_x + win_width / 2);
 
 	wgetch(win);
+	flushinp();
 
 	wclear(win);
 	wrefresh(win);
