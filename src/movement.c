@@ -56,7 +56,6 @@ move_up(void)
 {
 	if (content.row == NULL) return;
 
-//	int xoff = content.x_pos + content.x_off;
 	int yoff = content.y_pos + content.y_off;
 
 	if (content.y_pos - 1 > 0) {
@@ -64,6 +63,8 @@ move_up(void)
 	} else if (content.y_off > 0) {
 		content.y_off--;
 	}
+
+	if (yoff - 2 < 0) return;
 
 	int prowlen = content.row[yoff - 2].length;
 
@@ -81,14 +82,15 @@ move_down(void)
 {
 	if (content.row == NULL) return;
 
-//	int xoff = content.x_pos + content.x_off;
 	int yoff = content.y_pos + content.y_off;
-///////////////////////////
+
 	if (content.y_pos < LIMIT_Y && yoff < content.nrows) {
 		content.y_pos++;
 	} else if ((content.y_pos < content.nrows) && (yoff < content.nrows)) {
 		content.y_off++;
 	}
+
+	if (yoff >= content.nrows) return;
 
 	int nrowlen = content.row[yoff].length;
 
