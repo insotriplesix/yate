@@ -1,3 +1,10 @@
+/********************************************************************
+ * PROGRAM: yate
+ * FILE: movement.h
+ * PURPOSE: arrow keys, page keys, home and end keys handlers
+ * AUTHOR: 5aboteur <5aboteur@protonmail.com>
+ *******************************************************************/
+
 #ifndef __MOVEMENT_H__
 #define __MOVEMENT_H__
 

@@ -1,3 +1,10 @@
+/********************************************************************
+ * PROGRAM: yate
+ * FILE: init.h
+ * PURPOSE: editor initialization functions
+ * AUTHOR: 5aboteur <5aboteur@protonmail.com>
+ *******************************************************************/
+
 #ifndef __INIT_H__
 #define __INIT_H__
 
@@ -7,12 +14,8 @@ void initialize(int argc, char *argv[]);
 void finalize(void);
 
 int init_colors(void);
-int init_gui(void);
+void init_gui(void);
 int init_ncurses(void);
-int init_windows(void);
-
-int get_config(void);
-int load_config(void);
-int save_config(void);
+void init_windows(void);
 
 #endif

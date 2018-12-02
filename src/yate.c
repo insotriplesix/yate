@@ -1,25 +1,29 @@
+/********************************************************************
+ * PROGRAM: yate
+ * FILE: yate.c
+ * PURPOSE: main routine
+ * AUTHOR: 5aboteur <5aboteur@protonmail.com>
+ *******************************************************************/
+
 #include "editor.h"
 #include "gui.h"
 #include "init.h"
 #include "readkey.h"
 
-// TODO 1: hexeditor
-// TODO 2: deal with saving && long fnames
+// TODO 1: horiz_tab handler
+// TODO 2: hexeditor
 
 int
 main(int argc, char *argv[])
 {
-	int rc = OK;
-
 	initialize(argc, argv);
 
 	while (0x1) {
 		update_gui();
-		rc = readkey();
-		if (rc == ERR) break;
+		readkey();
 	}
 
 	finalize();
 
-	return rc;
+	return 0;
 }

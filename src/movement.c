@@ -1,4 +1,21 @@
+/********************************************************************
+ * PROGRAM: yate
+ * FILE: movement.c
+ * PURPOSE: arrow keys, page keys, home and end keys handlers
+ * AUTHOR: 5aboteur <5aboteur@protonmail.com>
+ *******************************************************************/
+
 #include "movement.h"
+
+/*
+ * Function: move_left
+ * -------------------
+ * Description:
+ *  Moves cursor on one character to the left.
+ *
+ * Asserts:
+ *  Y-axis cursor offset can`t be less than zero.
+ */
 
 void
 move_left(void)
@@ -12,6 +29,7 @@ move_left(void)
 	} else if (content.x_off > 0) {
 		content.x_off--;
 	} else if (yoff != DEFPOS_Y) {
+		assert(yoff - 2 >= 0);
 		int prowlen = content.row[yoff - 2].length;
 		if (prowlen < LIMIT_X) {
 			content.x_pos = prowlen + 1;
@@ -19,13 +37,20 @@ move_left(void)
 			content.x_pos = LIMIT_X;
 			content.x_off = prowlen + 1 - LIMIT_X;
 		}
-		if (content.y_pos - 1 > 0) {
+
+		if (content.y_pos - 1 > 0)
 			content.y_pos--;
-		} else if (content.y_off > 0) {
+		else if (content.y_off > 0)
 			content.y_off--;
-		}
 	}
 }
+
+/*
+ * Function: move_right
+ * --------------------
+ * Description:
+ *  Moves cursor on one character to the right.
+ */
 
 void
 move_right(void)
@@ -43,13 +68,20 @@ move_right(void)
 	} else if (yoff != content.nrows) {
 		content.x_pos = DEFPOS_X;
 		content.x_off = 0;
-		if (content.y_pos < LIMIT_Y) {
+
+		if (content.y_pos < LIMIT_Y)
 			content.y_pos++;
-		} else if (yoff < content.nrows) {
+		else if (yoff < content.nrows)
 			content.y_off++;
-		}
 	}
 }
+
+/*
+ * Function: move_up
+ * -----------------
+ * Description:
+ *  Moves cursor up to the end of the previous row.
+ */
 
 void
 move_up(void)
@@ -58,12 +90,12 @@ move_up(void)
 
 	int yoff = content.y_pos + content.y_off;
 
-	if (content.y_pos - 1 > 0) {
+	if (content.y_pos - 1 > 0)
 		content.y_pos--;
-	} else if (content.y_off > 0) {
+	else if (content.y_off > 0)
 		content.y_off--;
-	}
 
+	// If true then we reached the top
 	if (yoff - 2 < 0) return;
 
 	int prowlen = content.row[yoff - 2].length;
@@ -77,6 +109,13 @@ move_up(void)
 	}
 }
 
+/*
+ * Function: move_down
+ * -------------------
+ * Description:
+ *  Moves cursor down to the end of the next row.
+ */
+
 void
 move_down(void)
 {
@@ -84,12 +123,12 @@ move_down(void)
 
 	int yoff = content.y_pos + content.y_off;
 
-	if (content.y_pos < LIMIT_Y && yoff < content.nrows) {
+	if (content.y_pos < LIMIT_Y && yoff < content.nrows)
 		content.y_pos++;
-	} else if ((content.y_pos < content.nrows) && (yoff < content.nrows)) {
+	else if ((content.y_pos < content.nrows) && (yoff < content.nrows))
 		content.y_off++;
-	}
 
+	// If true then we reached the bottom
 	if (yoff >= content.nrows) return;
 
 	int nrowlen = content.row[yoff].length;
@@ -103,20 +142,41 @@ move_down(void)
 	}
 }
 
+/*
+ * Function: move_home
+ * -------------------
+ * Description:
+ *  Moves cursor on 'COLS - 2' characters to the left.
+ */
+
 void
 move_home(void)
 {
 	content.x_pos = DEFPOS_X;
 }
 
+/*
+ * Function: move_end
+ * ------------------
+ * Description:
+ *  Moves cursor on 'COLS - 2' characters to the right.
+ */
+
 void
 move_end(void)
 {
 	if (content.row == NULL) return;
-
 	int rowlen = content.row[content.y_pos + content.y_off - 1].length;
 	content.x_pos = (rowlen > LIMIT_X) ? LIMIT_X : rowlen + 1;
 }
+
+/*
+ * Function: move_npage
+ * --------------------
+ * Description:
+ *  Moves cursor down to the last row on the screen. Also skip text
+ *  up to the next page.
+ */
 
 void
 move_npage(void)
@@ -126,14 +186,25 @@ move_npage(void)
 
 	if (content.y_pos == LIMIT_Y) {
 		content.y_off += ((LIMIT_Y*2 + yoff) > nrows)
-			? nrows - (LIMIT_Y + yoff) : LIMIT_Y;
+				? nrows - (LIMIT_Y + yoff)
+				: LIMIT_Y;
 	} else {
-		content.y_pos = (nrows == 0 ? DEFPOS_Y : (nrows < LIMIT_Y ? nrows : LIMIT_Y));
+		content.y_pos = (nrows > 0)
+			? (nrows < LIMIT_Y ? nrows : LIMIT_Y)
+			: DEFPOS_Y;
 	}
 
 	content.x_pos = DEFPOS_X;
 	content.x_off = 0;
 }
+
+/*
+ * Function: move_ppage
+ * --------------------
+ * Description:
+ *  Moves cursor up to the first row on the screen. Also skip text
+ *  up to the previous page.
+ */
 
 void
 move_ppage(void)
@@ -142,7 +213,8 @@ move_ppage(void)
 
 	if (content.y_pos == DEFPOS_Y) {
 		content.y_off -= ((yoff - LIMIT_Y*2) < DEFPOS_Y)
-			? ((yoff - LIMIT_Y >= 0) ? LIMIT_Y : yoff) : LIMIT_Y;
+			? ((yoff - LIMIT_Y >= 0) ? LIMIT_Y : yoff)
+			: LIMIT_Y;
 	} else {
 		content.y_pos = DEFPOS_Y;
 	}
