@@ -10,8 +10,7 @@
 #include "init.h"
 #include "readkey.h"
 
-// TODO 1: horiz_tab handler
-// TODO 2: hexeditor
+// TODO: built-in hexeditor
 
 int
 main(int argc, char *argv[])
