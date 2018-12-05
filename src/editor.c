@@ -58,6 +58,9 @@ disable_raw_mode(void)
  *  'popup' - the flag that indicates wheter a popup window will be
  *            displayed or not.
  *
+ * Asserts:
+ *  'realloc' won`t return NULL.
+ *
  * Notes:
  *  We don`t want to kill the program if something happened with
  *  the file that we tried to open and get its parameters. So, if
@@ -99,6 +102,25 @@ open_file(int popup)
 		while (len > 0 && (line[len - 1] == '\n' ||
 			line[len - 1] == '\r')) {
 			len--;
+		}
+
+		// Convert tabs to spaces
+		for (int i = 0; i < len; ++i) {
+			if (line[i] == '\t') {
+				line = realloc(line, sizeof(char) *
+					(len + YATE_TABSIZE + 1));
+
+				assert(line != NULL);
+
+				memmove(&line[i + YATE_TABSIZE], &line[i + 1],
+					sizeof(char) * (len - i + 1));
+
+				for (int j = 0; j < YATE_TABSIZE; ++j)
+					line[i + j] = ' ';
+
+				i += YATE_TABSIZE - 1;
+				len += YATE_TABSIZE - 1;
+			}
 		}
 
 		insert_row(content.nrows, line, len);
@@ -159,19 +181,52 @@ save_file(void)
 }
 
 /*
- * Function: horizontal_tab
+ * Function: horiz_tab
  * ------------------------
  * Description:
  *  'Tab' (\t) key handler.
  *
- * Notes:
- *  Not implemented yet.
+ * Asserts:
+ *  X and Y offsets can`t go beyond of the boundaries.
+ *  'realloc' won`t return NULL.
  */
 
 void
 horiz_tab(void)
 {
+	int xoff = content.x_pos + content.x_off - DEFPOS_X;
+	int yoff = content.y_pos + content.y_off - DEFPOS_Y;
 
+	assert(xoff >= 0);
+	assert(yoff >= 0);
+
+	if (content.row == NULL)
+		insert_row(yoff, "", 0);
+
+	row_t *row = &content.row[yoff];
+	int pos = (xoff > row->length) ? row->length : xoff;
+
+	// Increase allocated memory chunk by editor tab size value
+	row->chars = realloc(row->chars, sizeof(char) *
+		(row->length + YATE_TABSIZE + 1));
+
+	assert(row->chars != NULL);
+
+	memmove(&row->chars[pos + YATE_TABSIZE], &row->chars[pos],
+		sizeof(char) * (row->length - pos));
+
+	row->length += YATE_TABSIZE;
+	row->chars[row->length] = '\0';
+
+	for (int i = 0; i < YATE_TABSIZE; ++i)
+		row->chars[pos + i] = ' ';
+
+	if (content.x_pos + YATE_TABSIZE < LIMIT_X)
+		content.x_pos += YATE_TABSIZE ;
+	else {
+		content.x_off += YATE_TABSIZE - (LIMIT_X - content.x_pos);
+		content.x_pos = LIMIT_X;
+	}
 }
 
 /*

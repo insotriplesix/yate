@@ -54,6 +54,7 @@
 #define LIMIT_X (COLS - 2)
 #define LIMIT_Y (LINES - 10)
 
+#define YATE_TABSIZE 4
 #define ERRDESCR_MAX 64
 #define DEFAULT_FNAME "yate_untitled.txt"
 
