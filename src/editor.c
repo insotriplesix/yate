@@ -466,28 +466,36 @@ rows_to_string(size_t *buflen)
  * Function: get_config
  * --------------------
  * Description:
- *  Gets CWD and append to it '.config' string.
+ *  Gets CWD and appends to it the '.config' string.
+ *
+ * Asserts:
+ *  'malloc' won`t return NULL.
  */
 
 void
 get_config(void)
 {
-	char cwd[PATH_MAX];
+	size_t sz = sizeof(char) * (PATH_MAX + 1);
+	char *cwd = malloc(sz);
 
-	if (getcwd(cwd, sizeof(cwd)) == NULL) {
+	assert(cwd != NULL);
+
+	if (getcwd(cwd, sz) == NULL) {
 		set_status(1, "config path not defined");
+		free(cwd);
 		return;
 	}
 
-	snprintf(CONFIG_PATH, sizeof(CONFIG_PATH),
-		"%s/%s", cwd, ".config");
+	sprintf(CONFIG_PATH, "%s/%s", cwd, ".config");
+
+	free(cwd);
 }
 
 /*
  * Function: load_config
  * ---------------------
  * Description:
- *  Loads the config file and parse its attributes.
+ *  Loads the config file and parses its attributes.
  */
 
 void
