@@ -157,10 +157,10 @@ init_windows(void)
 	assert(win[MENU_W] != NULL);
 
 	win[EDIT_W] = newwin(LINES - 8, COLS, 3, 0);
-	assert(win[MENU_W] != NULL);
+	assert(win[EDIT_W] != NULL);
 
 	win[INFO_W] = newwin(5, COLS, LINES - 5, 0);
-	assert(win[MENU_W] != NULL);
+	assert(win[INFO_W] != NULL);
 
 	// Enable scrolling, func keys, arrows etc
 	keypad(win[EDIT_W], TRUE);
